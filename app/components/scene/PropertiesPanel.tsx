@@ -3,14 +3,13 @@
 import React from 'react';
 
 interface PropertiesPanelProps {
-  position: { x: number; y: number; z: number };
-  rotation: { x: number; y: number; z: number };
-  onChangePosition: (axis: string, value: number) => void;
-  onChangeRotation: (axis: string, value: number) => void;
-  onFinish: () => void;
-  onAbort: () => void;
-}
-
+    position: { x: number; y: number; z: number };
+    rotation: { x: number; y: number; z: number };
+    onChangePosition: (axis: 'x' | 'y' | 'z', value: number) => void;
+    onChangeRotation: (axis: 'x' | 'y' | 'z', value: number) => void;
+    onFinish: () => void;
+    onAbort: () => void;
+  }
 export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
   position,
   rotation,
