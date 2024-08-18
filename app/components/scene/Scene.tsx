@@ -121,9 +121,9 @@ export const Scene = () => {
           <meshStandardMaterial attach="material" color="green" transparent opacity={0.5} />
         </Sphere>
       )}
-      {draggedModel && (
-        <Model position={draggedModel} scale={[1, 1, 1]} opacity={0.5} />
-      )}
+      {/* {draggedModel && (
+        <Model position={draggedModel} scale={[1, 1, 1]} opacity={0.5} modelPath={'/models/desk.glb'} meshName={'Desk_v2'} />
+      )} */}
       <Perf />
     </Canvas>
   );

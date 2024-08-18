@@ -8,9 +8,54 @@ interface SidebarProps {
   onDragStart: (event: React.DragEvent<HTMLDivElement>, type: string) => void;
 }
 
+interface AssetConfig {
+  name: string;
+  modelPath: string;
+  scale: number | [number, number, number];
+  fov: number;
+}
+
+const assets: AssetConfig[] = [
+  {
+    name: 'Desk',
+    modelPath: '/desktest.glb',
+    scale: [0.01, 0.01, 0.01],
+    fov: 20,
+  },
+  {
+    name: 'Laptop',
+    modelPath: '/laptoptest.gltf',
+    scale: 0.01,
+    fov: 15,
+  },
+  // Add more assets here
+];
+
 const Sidebar: React.FC<SidebarProps> = ({ onDragStart }) => {
+  return (
+    <div className="sidebar">
+      {assets.map((asset) => (
+        <AssetPreview
+          key={asset.name}
+          asset={asset}
+          onDragStart={onDragStart}
+        />
+      ))}
+    </div>
+  );
+};
+
+interface AssetPreviewProps {
+  asset: AssetConfig;
+  onDragStart: (event: React.DragEvent<HTMLDivElement>, type: string) => void;
+}
+
+const AssetPreview: React.FC<AssetPreviewProps> = ({
+  asset,
+  onDragStart,
+}) => {
   const [isHovered, setIsHovered] = useState(false);
-  const cameraPosition = new THREE.Vector3(0, 0, 5); // Initial camera position at a 45-degree angle
+  const cameraPosition = new THREE.Vector3(3, 3, 3);
 
   const handleHover = () => {
     setIsHovered(true);
@@ -21,41 +66,43 @@ const Sidebar: React.FC<SidebarProps> = ({ onDragStart }) => {
   };
 
   return (
-    <div className="sidebar">
-      <div
-        className="asset"
-        draggable
-        onDragStart={(event) => onDragStart(event, 'desk')}
-        onMouseEnter={handleHover}
-        onMouseLeave={handleHoverOut}
+    <div
+      className="asset"
+      draggable
+      onDragStart={(event) => onDragStart(event, asset.name.toLowerCase())}
+      onMouseEnter={handleHover}
+      onMouseLeave={handleHoverOut}
+    >
+      <Canvas
+        style={{ height: '150px', width: '150px' }}
+        camera={{ position: cameraPosition.clone(), fov: asset.fov }}
       >
-        <Canvas
-          style={{ height: '150px', width: '150px' }}
-          camera={{ position: cameraPosition.clone(), fov: 40 }}
-        >
-            <axesHelper args={[5]} />
-          <ambientLight intensity={1} />
-          <RotatingCamera isHovered={isHovered} />
-          <Model position={new THREE.Vector3(0, 0, 0)} />
-        </Canvas>
-        <p>Desk</p>
-      </div>
-      {/* Add more assets with their own previews here */}
+        <axesHelper args={[5]} />
+        <ambientLight intensity={1} />
+        <RotatingCamera isHovered={isHovered} initialPosition={cameraPosition} />
+        <Model modelPath={asset.modelPath} scale={asset.scale} />
+      </Canvas>
+      <p>{asset.name}</p>
     </div>
   );
 };
 
 // Custom component to handle camera rotation
-const RotatingCamera: React.FC<{ isHovered: boolean }> = ({ isHovered }) => {
-  const cameraRotationSpeed = 0.01; // Adjust the rotation speed as needed
+const RotatingCamera: React.FC<{ isHovered: boolean; initialPosition: THREE.Vector3 }> = ({
+  isHovered,
+  initialPosition,
+}) => {
+  const cameraRotationSpeed = 0.01;
 
   useFrame(({ camera }) => {
     if (isHovered) {
-      camera.position.applyAxisAngle(new THREE.Vector3(0, 1, 0), cameraRotationSpeed); // Rotate around the Y-axis
-      camera.lookAt(0, 0, 0); // Keep the camera focused on the center
+      camera.position.applyAxisAngle(new THREE.Vector3(0, 1, 0), cameraRotationSpeed);
+      camera.lookAt(0, 0, 0);
+      //demand a re-render
+        camera.updateProjectionMatrix();
     } else {
-      camera.position.set(0, 5, 5); // Reset to initial position
-      camera.lookAt(0, 0, 0); // Keep the camera focused on the center
+      camera.position.copy(initialPosition); // Reset to initial position
+      camera.lookAt(0, 0, 0);
     }
   });
 
