@@ -5,7 +5,7 @@ import { OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
 
 interface SidebarProps {
-  onDragStart: (event: React.DragEvent<HTMLDivElement>, type: string) => void;
+  onAddToScene: (modelData: AssetConfig) => void;
 }
 
 interface AssetConfig {
@@ -31,14 +31,14 @@ const assets: AssetConfig[] = [
   // Add more assets here
 ];
 
-const Sidebar: React.FC<SidebarProps> = ({ onDragStart }) => {
+const Sidebar: React.FC<SidebarProps> = ({ onAddToScene }) => {
   return (
     <div className="sidebar">
       {assets.map((asset) => (
         <AssetPreview
           key={asset.name}
           asset={asset}
-          onDragStart={onDragStart}
+          onAddToScene={onAddToScene}
         />
       ))}
     </div>
@@ -47,12 +47,12 @@ const Sidebar: React.FC<SidebarProps> = ({ onDragStart }) => {
 
 interface AssetPreviewProps {
   asset: AssetConfig;
-  onDragStart: (event: React.DragEvent<HTMLDivElement>, type: string) => void;
+  onAddToScene: (modelData: AssetConfig) => void;
 }
 
 const AssetPreview: React.FC<AssetPreviewProps> = ({
   asset,
-  onDragStart,
+  onAddToScene,
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const cameraPosition = new THREE.Vector3(3, 3, 3);
@@ -68,8 +68,6 @@ const AssetPreview: React.FC<AssetPreviewProps> = ({
   return (
     <div
       className="asset"
-      draggable
-      onDragStart={(event) => onDragStart(event, asset.name.toLowerCase())}
       onMouseEnter={handleHover}
       onMouseLeave={handleHoverOut}
     >
@@ -83,6 +81,7 @@ const AssetPreview: React.FC<AssetPreviewProps> = ({
         <Model modelPath={asset.modelPath} scale={asset.scale} />
       </Canvas>
       <p>{asset.name}</p>
+      <button onClick={() => onAddToScene(asset)}>Add to Scene</button>
     </div>
   );
 };
@@ -98,8 +97,7 @@ const RotatingCamera: React.FC<{ isHovered: boolean; initialPosition: THREE.Vect
     if (isHovered) {
       camera.position.applyAxisAngle(new THREE.Vector3(0, 1, 0), cameraRotationSpeed);
       camera.lookAt(0, 0, 0);
-      //demand a re-render
-        camera.updateProjectionMatrix();
+      camera.updateProjectionMatrix();
     } else {
       camera.position.copy(initialPosition); // Reset to initial position
       camera.lookAt(0, 0, 0);
